@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useEmotion, EmotionType } from '@/contexts/EmotionContext';
 import { Button } from '@/components/ui/button';
-import { Camera, CameraOff, User, Shield, AlertTriangle } from 'lucide-react';
+import { Camera, CameraOff, User, Shield, AlertTriangle, Sparkles } from 'lucide-react';
 
 const emotionOptions: { type: EmotionType; label: string; emoji: string; desc: string }[] = [
   { type: 'confident', label: 'Сенімдімін', emoji: '😊', desc: 'Жақсы түсініп жатырмын' },
@@ -13,14 +13,14 @@ const emotionOptions: { type: EmotionType; label: string; emoji: string; desc: s
   { type: 'bored', label: 'Жалығып отырмын', emoji: '😑', desc: 'Қызықсыз' },
 ];
 
-const emotionBgColor: Record<EmotionType, string> = {
-  confident: 'border-success bg-success/10',
-  curious: 'border-secondary bg-secondary/10',
-  confused: 'border-warning bg-warning/10',
-  tired: 'border-muted-foreground bg-muted',
-  sad: 'border-secondary bg-secondary/10',
-  bored: 'border-muted-foreground bg-muted',
-  neutral: 'border-border bg-muted',
+const emotionBorderColors: Record<EmotionType, string> = {
+  confident: 'border-success/40 shadow-[0_4px_20px_-4px_hsl(155_70%_42%/0.15)]',
+  curious: 'border-primary/40 shadow-[0_4px_20px_-4px_hsl(200_90%_55%/0.15)]',
+  confused: 'border-warning/40 shadow-[0_4px_20px_-4px_hsl(38_90%_52%/0.15)]',
+  tired: 'border-muted-foreground/20',
+  sad: 'border-secondary/40 shadow-[0_4px_20px_-4px_hsl(330_65%_70%/0.15)]',
+  bored: 'border-muted-foreground/20',
+  neutral: 'border-border',
 };
 
 export default function EmotionPage() {
@@ -52,7 +52,6 @@ export default function EmotionPage() {
 
   useEffect(() => () => stopCamera(), []);
 
-  // Simulated emotion detection — in real app, use TensorFlow.js / face-api.js
   useEffect(() => {
     if (!cameraEnabled) return;
     const interval = setInterval(() => {
@@ -71,31 +70,39 @@ export default function EmotionPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-2">Эмоцияны анықтау</h1>
-        <p className="text-muted-foreground mb-6">AI көмекші сенің күйіңді ескеріп, оқуды бейімдейді</p>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg"
+               style={{ background: 'var(--gradient-primary)' }}>
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Эмоцияны анықтау</h1>
+            <p className="text-sm text-muted-foreground">AI көмекші сенің күйіңді ескеріп, оқуды бейімдейді</p>
+          </div>
+        </div>
 
         {/* Privacy notice */}
-        <div className="glass-card p-4 mb-6 flex items-start gap-3 border-l-4 border-primary">
+        <div className="glass-card-blue p-4 mb-6 flex items-start gap-3">
           <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-foreground">Құпиялылық кепілдігі</p>
-            <p className="text-xs text-muted-foreground">Камера деректері тек жергілікті (local) түрде өңделеді. Ешқандай видео сақталмайды немесе серверге жіберілмейді. Бұл медициналық диагноз емес — тек оқу процесін жақсарту үшін.</p>
+            <p className="text-sm font-semibold text-foreground">Құпиялылық кепілдігі</p>
+            <p className="text-xs text-muted-foreground">Камера деректері тек жергілікті (local) түрде өңделеді. Ешқандай видео сақталмайды.</p>
           </div>
         </div>
 
         {/* Camera section */}
-        <div className="glass-card p-6 mb-6">
+        <div className="glass-card p-6 mb-6 shadow-elevated">
           <h2 className="font-display font-semibold text-foreground text-lg mb-4 flex items-center gap-2">
             <Camera className="w-5 h-5 text-primary" />
             Камера режимі
-            <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full">Демо</span>
+            <span className="text-xs glass-card-pink px-2.5 py-1 rounded-full font-semibold">Демо</span>
           </h2>
 
-          <div className="relative aspect-video bg-muted rounded-xl overflow-hidden mb-4 max-w-sm mx-auto">
+          <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 max-w-sm mx-auto shadow-inner">
             <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
             {!cameraEnabled && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <CameraOff className="w-12 h-12 text-muted-foreground" />
+                <CameraOff className="w-12 h-12 text-muted-foreground/50" />
               </div>
             )}
           </div>
@@ -109,11 +116,11 @@ export default function EmotionPage() {
 
           <div className="flex gap-3 justify-center">
             {!cameraEnabled ? (
-              <Button variant="hero" onClick={startCamera}>
+              <Button variant="hero" onClick={startCamera} className="rounded-xl glow-primary">
                 <Camera className="w-4 h-4 mr-1" /> Камераны қосу
               </Button>
             ) : (
-              <Button variant="outline" onClick={stopCamera}>
+              <Button variant="outline" onClick={stopCamera} className="rounded-xl">
                 <CameraOff className="w-4 h-4 mr-1" /> Камераны өшіру
               </Button>
             )}
@@ -121,24 +128,26 @@ export default function EmotionPage() {
         </div>
 
         {/* Manual selection */}
-        <div className="glass-card p-6 mb-6">
+        <div className="glass-card p-6 mb-6 shadow-elevated">
           <h2 className="font-display font-semibold text-foreground text-lg mb-4 flex items-center gap-2">
             <User className="w-5 h-5 text-secondary" />
             Қолмен таңдау
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">Өзіңіздің қазіргі күйіңізді таңдаңыз:</p>
+          <p className="text-sm text-muted-foreground mb-5">Өзіңіздің қазіргі күйіңізді таңдаңыз:</p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {emotionOptions.map((opt) => (
               <button
                 key={opt.type}
                 onClick={() => handleManualSelect(opt.type)}
-                className={`p-4 rounded-xl border-2 transition-all text-center hover:scale-105 ${
-                  emotion.current === opt.type ? emotionBgColor[opt.type] : 'border-border hover:border-primary/30'
+                className={`p-4 rounded-2xl border-2 transition-all duration-300 text-center hover:scale-[1.03] hover:shadow-lg ${
+                  emotion.current === opt.type 
+                    ? emotionBorderColors[opt.type] + ' bg-accent/30' 
+                    : 'border-border hover:border-primary/30'
                 }`}
               >
                 <span className="text-3xl block mb-2">{opt.emoji}</span>
-                <p className="font-medium text-foreground text-sm">{opt.label}</p>
+                <p className="font-semibold text-foreground text-sm">{opt.label}</p>
                 <p className="text-xs text-muted-foreground">{opt.desc}</p>
               </button>
             ))}
@@ -147,17 +156,17 @@ export default function EmotionPage() {
 
         {/* Current state */}
         <motion.div key={emotion.current} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className={`glass-card p-6 border-2 ${emotionBgColor[emotion.current]}`}>
-          <h3 className="font-display font-semibold text-foreground text-lg mb-2">Қазіргі күй</h3>
+          className={`glass-card p-6 border-2 shadow-elevated ${emotionBorderColors[emotion.current]}`}>
+          <h3 className="font-display font-semibold text-foreground text-lg mb-3">Қазіргі күй</h3>
           <p className="text-foreground mb-1">
             Эмоция: <strong>{emotionOptions.find(e => e.type === emotion.current)?.label || 'Бейтарап'}</strong>
             <span className="text-muted-foreground text-sm ml-2">({emotion.source === 'camera' ? 'Камера' : 'Қолмен'})</span>
           </p>
           {message && <p className="text-sm text-muted-foreground mt-2 italic">{message}</p>}
 
-          <div className="mt-4 bg-accent/50 p-4 rounded-xl">
-            <p className="text-sm font-medium text-accent-foreground mb-1">Платформа бейімделуі:</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-4 glass-card-pink p-5">
+            <p className="text-sm font-semibold text-foreground mb-2">Платформа бейімделуі:</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {emotion.current === 'confused' && 'Сабақтар жеңілдетілген тілмен, қысқа абзацтармен беріледі. Демонстрациялар көбейтілді.'}
               {emotion.current === 'confident' && 'Тереңдетілген түсіндірмелер мен күрделірек есептер ұсынылады.'}
               {emotion.current === 'tired' && 'Сабақ жеңіл режимде, қысқа блоктармен беріледі. Демалыс ұсынылады.'}
