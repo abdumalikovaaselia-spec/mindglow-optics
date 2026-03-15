@@ -5,6 +5,29 @@ import { BookOpen, FlaskConical, Calculator, Brain, TrendingUp, LayoutDashboard,
 import { cn } from '@/lib/utils';
 import { useEmotion } from '@/contexts/EmotionContext';
 
+// Anime avatars
+import girlConfident from '@/assets/emotions/girl-confident.png';
+import girlCurious from '@/assets/emotions/girl-curious.png';
+import girlConfused from '@/assets/emotions/girl-confused.png';
+import girlTired from '@/assets/emotions/girl-tired.png';
+import girlSad from '@/assets/emotions/girl-sad.png';
+import girlBored from '@/assets/emotions/girl-bored.png';
+import girlNeutral from '@/assets/emotions/girl-neutral.png';
+import boyConfident from '@/assets/emotions/boy-confident.png';
+import boyCurious from '@/assets/emotions/boy-curious.png';
+import boyConfused from '@/assets/emotions/boy-confused.png';
+import boyTired from '@/assets/emotions/boy-tired.png';
+import boySad from '@/assets/emotions/boy-sad.png';
+import boyBored from '@/assets/emotions/boy-bored.png';
+import boyNeutral from '@/assets/emotions/boy-neutral.png';
+
+import type { EmotionType, GenderType } from '@/contexts/EmotionContext';
+
+const avatarMap: Record<GenderType, Record<EmotionType, string>> = {
+  girl: { confident: girlConfident, curious: girlCurious, confused: girlConfused, tired: girlTired, sad: girlSad, bored: girlBored, neutral: girlNeutral },
+  boy: { confident: boyConfident, curious: boyCurious, confused: boyConfused, tired: boyTired, sad: boySad, bored: boyBored, neutral: boyNeutral },
+};
+
 const navItems = [
   { path: '/', label: 'Басты бет', icon: Home },
   { path: '/lesson', label: 'Сабақ', icon: BookOpen },
@@ -14,16 +37,6 @@ const navItems = [
   { path: '/progress', label: 'Прогресс', icon: TrendingUp },
   { path: '/teacher', label: 'Мұғалім', icon: LayoutDashboard },
 ];
-
-const emotionEmoji: Record<string, string> = {
-  confident: '😊',
-  curious: '🤔',
-  confused: '😕',
-  tired: '😴',
-  sad: '😢',
-  bored: '😑',
-  neutral: '✨',
-};
 
 const emotionLabels: Record<string, string> = {
   confident: 'Сенімді',
@@ -37,7 +50,7 @@ const emotionLabels: Record<string, string> = {
 
 export default function AppNavbar() {
   const location = useLocation();
-  const { emotion } = useEmotion();
+  const { emotion, gender } = useEmotion();
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-border/30">
@@ -83,7 +96,11 @@ export default function AppNavbar() {
           </div>
 
           <div className="flex items-center gap-2 glass-card px-3 py-1.5 !rounded-full">
-            <span className="text-base">{emotionEmoji[emotion.current]}</span>
+            <img
+              src={avatarMap[gender][emotion.current]}
+              alt={emotionLabels[emotion.current]}
+              className="w-8 h-8 object-contain"
+            />
             <span className="text-xs text-muted-foreground hidden sm:inline font-medium">
               {emotionLabels[emotion.current]}
             </span>

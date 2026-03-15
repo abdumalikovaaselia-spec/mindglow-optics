@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 
 export type EmotionType = 'confident' | 'curious' | 'confused' | 'tired' | 'sad' | 'bored' | 'neutral';
 
+export type GenderType = 'girl' | 'boy';
+
 export interface EmotionState {
   current: EmotionType;
   confidence: number;
@@ -14,6 +16,8 @@ interface EmotionContextType {
   setEmotion: (emotion: EmotionType, source?: 'camera' | 'manual' | 'inferred') => void;
   cameraEnabled: boolean;
   setCameraEnabled: (enabled: boolean) => void;
+  gender: GenderType;
+  setGender: (gender: GenderType) => void;
   getAdaptiveLevel: () => 'simplified' | 'normal' | 'advanced';
   getMotivationalMessage: () => string;
 }
@@ -66,6 +70,7 @@ export function EmotionProvider({ children }: { children: ReactNode }) {
     source: 'manual',
   });
   const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [gender, setGender] = useState<GenderType>('girl');
 
   const setEmotion = useCallback((newEmotion: EmotionType, source: 'camera' | 'manual' | 'inferred' = 'manual') => {
     setEmotionState(prev => ({
@@ -96,7 +101,7 @@ export function EmotionProvider({ children }: { children: ReactNode }) {
   }, [emotion.current]);
 
   return (
-    <EmotionContext.Provider value={{ emotion, setEmotion, cameraEnabled, setCameraEnabled, getAdaptiveLevel, getMotivationalMessage }}>
+    <EmotionContext.Provider value={{ emotion, setEmotion, cameraEnabled, setCameraEnabled, gender, setGender, getAdaptiveLevel, getMotivationalMessage }}>
       {children}
     </EmotionContext.Provider>
   );
