@@ -70,6 +70,7 @@ export function EmotionProvider({ children }: { children: ReactNode }) {
     source: 'manual',
   });
   const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [gender, setGender] = useState<GenderType>('girl');
 
   const setEmotion = useCallback((newEmotion: EmotionType, source: 'camera' | 'manual' | 'inferred' = 'manual') => {
     setEmotionState(prev => ({
