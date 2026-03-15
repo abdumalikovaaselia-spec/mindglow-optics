@@ -101,7 +101,7 @@ export function EmotionProvider({ children }: { children: ReactNode }) {
   }, [emotion.current]);
 
   return (
-    <EmotionContext.Provider value={{ emotion, setEmotion, cameraEnabled, setCameraEnabled, getAdaptiveLevel, getMotivationalMessage }}>
+    <EmotionContext.Provider value={{ emotion, setEmotion, cameraEnabled, setCameraEnabled, gender, setGender, getAdaptiveLevel, getMotivationalMessage }}>
       {children}
     </EmotionContext.Provider>
   );
