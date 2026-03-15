@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 
 export type EmotionType = 'confident' | 'curious' | 'confused' | 'tired' | 'sad' | 'bored' | 'neutral';
 
+export type GenderType = 'girl' | 'boy';
+
 export interface EmotionState {
   current: EmotionType;
   confidence: number;
@@ -14,6 +16,8 @@ interface EmotionContextType {
   setEmotion: (emotion: EmotionType, source?: 'camera' | 'manual' | 'inferred') => void;
   cameraEnabled: boolean;
   setCameraEnabled: (enabled: boolean) => void;
+  gender: GenderType;
+  setGender: (gender: GenderType) => void;
   getAdaptiveLevel: () => 'simplified' | 'normal' | 'advanced';
   getMotivationalMessage: () => string;
 }
