@@ -160,45 +160,51 @@ const LESSON_DATA: Record<LessonEmotion, LessonConfig> = {
   },
 };
 
-function RefractionCanvas({ n1, n2, angle, color }: { n1: number; n2: number; angle: number; color: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d'); if (!ctx) return;
-    const W = canvas.width, H = canvas.height, cx = W / 2, boundary = H / 2;
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(30,41,59,0.4)'; ctx.fillRect(0, 0, W, boundary);
-    ctx.fillStyle = 'rgba(15,23,42,0.6)'; ctx.fillRect(0, boundary, W, boundary);
-    ctx.fillStyle = 'rgba(148,163,184,0.5)'; ctx.font = '11px monospace';
-    ctx.fillText('n\u2081=' + n1.toFixed(2), 6, 16);
-    ctx.fillText('n\u2082=' + n2.toFixed(2), 6, boundary + 16);
-    ctx.strokeStyle = 'rgba(148,163,184,0.3)'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, boundary); ctx.lineTo(W, boundary); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, boundary - 70); ctx.lineTo(cx, boundary + 70); ctx.stroke();
-    ctx.setLineDash([]);
-    const rad = (angle * Math.PI) / 180;
-    const ix = cx - Math.sin(rad) * 110, iy = boundary - Math.cos(rad) * 110;
-    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.shadowColor = color; ctx.shadowBlur = 6;
-    ctx.beginPath(); ctx.moveTo(ix, iy); ctx.lineTo(cx, boundary); ctx.stroke();
-    ctx.shadowBlur = 0;
-    const sin2 = (n1 / n2) * Math.sin(rad);
-    if (Math.abs(sin2) <= 1) {
-      const t2 = Math.asin(sin2);
-      ctx.globalAlpha = 0.85; ctx.shadowColor = color; ctx.shadowBlur = 6;
-      ctx.beginPath(); ctx.moveTo(cx, boundary); ctx.lineTo(cx + Math.sin(t2) * 100, boundary + Math.cos(t2) * 100); ctx.stroke();
-      ctx.shadowBlur = 0; ctx.globalAlpha = 1;
-      ctx.fillStyle = color; ctx.font = 'bold 11px monospace';
-      ctx.fillText('\u03b8\u2081=' + angle + '\u00b0', cx + 8, boundary - 22);
-      ctx.fillText('\u03b8\u2082=' + Math.round((t2 * 180) / Math.PI) + '\u00b0', cx + 8, boundary + 28);
-    } else {
-      ctx.strokeStyle = '#f59e0b'; ctx.shadowColor = '#f59e0b'; ctx.shadowBlur = 8;
-      ctx.beginPath(); ctx.moveTo(cx, boundary); ctx.lineTo(cx + Math.sin(rad) * 100, boundary - Math.cos(rad) * 100); ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 11px monospace';
-      ctx.fillText('\u0422\u043e\u043b\u044b\u049b \u0448\u0430\u0493\u044b\u043b\u0443!', cx - 50, boundary - 22);
-    }
-  }, [n1, n2, angle, color]);
-  return <canvas ref={canvasRef} width={300} height={220} className="w-full rounded-xl" style={{ maxHeight: 220 }} />;
+function RefractionSVG({ n1, n2, angle, color }: { n1: number; n2: number; angle: number; color: string }) {
+  const W = 320, H = 240, cx = W / 2, cy = H / 2;
+  const rad = (angle * Math.PI) / 180;
+  const sinT2 = (n1 / n2) * Math.sin(rad);
+  const totalReflection = Math.abs(sinT2) > 1;
+  const t2 = totalReflection ? rad : Math.asin(sinT2);
+  const refAngle = Math.round((t2 * 180) / Math.PI);
+  const rayLen = 100;
+
+  const ix = cx - Math.sin(rad) * rayLen;
+  const iy = cy - Math.cos(rad) * rayLen;
+  const rx = totalReflection
+    ? cx + Math.sin(rad) * rayLen
+    : cx + Math.sin(t2) * rayLen;
+  const ry = totalReflection
+    ? cy - Math.cos(rad) * rayLen
+    : cy + Math.cos(t2) * rayLen;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl" style={{ maxHeight: 240, background: 'linear-gradient(180deg, rgba(219,234,254,0.3) 0%, rgba(219,234,254,0.3) 50%, rgba(224,231,255,0.4) 50%, rgba(224,231,255,0.4) 100%)' }}>
+      <defs>
+        <filter id="rayGlow">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      <line x1={0} y1={cy} x2={W} y2={cy} stroke="hsl(220,20%,75%)" strokeWidth="1.5" strokeDasharray="6,4" opacity={0.6} />
+      <line x1={cx} y1={cy - 80} x2={cx} y2={cy + 80} stroke="hsl(220,15%,65%)" strokeWidth="1" strokeDasharray="4,4" opacity={0.4} />
+      <text x={cx + 4} y={cy - 68} fill="hsl(220,15%,50%)" fontSize="10" fontFamily="sans-serif">Нормаль</text>
+      <text x={8} y={18} fill="hsl(220,30%,30%)" fontSize="11" fontFamily="sans-serif" fontWeight="600">n₁ = {n1.toFixed(2)}</text>
+      <text x={8} y={cy + 18} fill="hsl(220,30%,30%)" fontSize="11" fontFamily="sans-serif" fontWeight="600">n₂ = {n2.toFixed(2)}</text>
+
+      <line x1={ix} y1={iy} x2={cx} y2={cy} stroke={color} strokeWidth="2.5" filter="url(#rayGlow)" />
+      <line x1={cx} y1={cy} x2={rx} y2={ry}
+        stroke={totalReflection ? 'hsl(0,75%,55%)' : color} strokeWidth="2.5" filter="url(#rayGlow)" opacity={0.85} />
+
+      <text x={cx + 6} y={cy - 20} fill={color} fontSize="12" fontFamily="sans-serif" fontWeight="600">θ₁ = {angle}°</text>
+      {!totalReflection && (
+        <text x={cx + 6} y={cy + 30} fill={color} fontSize="12" fontFamily="sans-serif" fontWeight="600">θ₂ = {refAngle}°</text>
+      )}
+      {totalReflection && (
+        <text x={cx - 60} y={cy + 30} fill="hsl(0,75%,55%)" fontSize="12" fontFamily="sans-serif" fontWeight="600">Толық шағылу!</text>
+      )}
+    </svg>
+  );
 }
 
 function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
@@ -215,9 +221,13 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
     if (!audioOn) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'kk-KZ'; u.rate = 0.9;
-    const v = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('kk') || v.lang.startsWith('ru'));
-    if (v) u.voice = v;
+    u.lang = 'kk-KZ';
+    u.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const kkVoice = voices.find(v => v.lang.startsWith('kk'));
+    const ruVoice = voices.find(v => v.lang.startsWith('ru'));
+    if (kkVoice) u.voice = kkVoice;
+    else if (ruVoice) { u.voice = ruVoice; u.lang = 'ru-RU'; }
     window.speechSynthesis.speak(u);
   };
 
@@ -228,7 +238,7 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <div className="h-px flex-1 bg-border/40" />
-        <span className="text-xs text-muted-foreground px-2">\u042d\u043c\u043e\u0446\u0438\u044f\u04a3\u0430 \u049b\u0430\u0440\u0430\u0439 \u0431\u0435\u0439\u0456\u043c\u0434\u0435\u043b\u0433\u0435\u043d \u0441\u0430\u0431\u0430\u049b</span>
+        <span className="text-xs text-muted-foreground px-2">Эмоцияңа қарай бейімделген сабақ</span>
         <div className="h-px flex-1 bg-border/40" />
       </div>
 
@@ -236,7 +246,7 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
            style={{ borderColor: cfg.color + '40', background: cfg.color + '08' }}>
         <div className="flex-1">
           <p className="font-semibold text-sm text-foreground">{cfg.motivation}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">\ud83d\udcda {cfg.lessonStyle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">📚 {cfg.lessonStyle}</p>
         </div>
         <button onClick={() => setAudioOn(!audioOn)} className="p-2 rounded-xl transition-colors"
           style={{ background: audioOn ? cfg.color + '20' : 'transparent' }}>
@@ -247,34 +257,34 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
       <div className="glass-card p-5 shadow-elevated">
         <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-sm">
           <FlaskConical className="w-4 h-4" style={{ color: cfg.color }} />
-          \u0406\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u0442\u0456 \u0434\u0435\u043c\u043e\u043d\u0441\u0442\u0440\u0430\u0446\u0438\u044f
+          Интерактивті демонстрация
         </h4>
-        <RefractionCanvas n1={cfg.n1} n2={n2} angle={angle} color={cfg.color} />
+        <RefractionSVG n1={cfg.n1} n2={n2} angle={angle} color={cfg.color} />
         <div className="mt-3 space-y-2">
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground text-xs w-28">\u0411\u04b1\u0440\u044b\u0448 \u03b8\u2081</span>
+            <span className="text-muted-foreground text-xs w-28">Бұрыш θ₁</span>
             <input type="range" min="5" max="80" step="1" value={angle}
-              onChange={e => setAngle(Number(e.target.value))} className="flex-1 accent-indigo-400" />
-            <span className="text-foreground text-xs font-mono w-10 text-right">{angle}&deg;</span>
+              onChange={e => setAngle(Number(e.target.value))} className="flex-1 accent-primary" />
+            <span className="text-foreground text-xs font-mono w-10 text-right">{angle}°</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-muted-foreground text-xs w-28">n\u2082 (\u043e\u0440\u0442\u0430)</span>
+            <span className="text-muted-foreground text-xs w-28">n₂ (орта)</span>
             <input type="range" min="1.0" max="2.5" step="0.05" value={n2}
-              onChange={e => setN2(Number(e.target.value))} className="flex-1 accent-purple-400" />
+              onChange={e => setN2(Number(e.target.value))} className="flex-1 accent-secondary" />
             <span className="text-foreground text-xs font-mono w-10 text-right">{n2.toFixed(2)}</span>
           </div>
         </div>
         <div className="mt-3 p-2.5 glass-card rounded-xl text-xs font-mono text-center" style={{ color: cfg.color }}>
           {theta2 !== null
-            ? cfg.n1.toFixed(2) + '\u00d7sin(' + angle + '\u00b0) = ' + n2.toFixed(2) + '\u00d7sin(' + theta2 + '\u00b0)'
-            : <span className="text-amber-400">\u26a1 \u0422\u043e\u043b\u044b\u049b \u0448\u0430\u0493\u044b\u043b\u0443!</span>}
+            ? `${cfg.n1.toFixed(2)}×sin(${angle}°) = ${n2.toFixed(2)}×sin(${theta2}°)`
+            : <span className="text-warning">⚡ Толық шағылу!</span>}
         </div>
       </div>
 
       <div className="glass-card p-5 shadow-elevated">
         <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-sm">
           <BookOpen className="w-4 h-4" style={{ color: cfg.color }} />
-          \u049a\u0430\u0434\u0430\u043c\u0434\u044b\u049b \u0442\u04af\u0441\u0456\u043d\u0434\u0456\u0440\u043c\u0435
+          Қадамдық түсіндірме
         </h4>
         <div className="flex gap-1.5 mb-3">
           {cfg.steps.map((_, i) => (
@@ -286,13 +296,13 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
         <div className="p-4 rounded-xl border" style={{ background: cfg.color + '08', borderColor: cfg.color + '30' }}>
           <p className="text-xs font-semibold mb-1.5" style={{ color: cfg.color }}>{step + 1}. {cfg.steps[step].title}</p>
           <p className="text-sm text-foreground leading-relaxed">{cfg.steps[step].content}</p>
-          <p className="text-xs font-mono mt-2 p-1.5 bg-black/10 rounded-lg" style={{ color: cfg.color }}>\ud83d\udca1 {cfg.steps[step].highlight}</p>
+          <p className="text-xs font-mono mt-2 p-1.5 bg-black/10 rounded-lg" style={{ color: cfg.color }}>💡 {cfg.steps[step].highlight}</p>
         </div>
         <div className="flex gap-2 mt-3">
           <button onClick={() => { const ns = Math.max(0, step - 1); setStep(ns); speak(cfg.steps[ns].content); }}
             disabled={step === 0}
             className="flex-1 py-2 rounded-xl text-xs flex items-center justify-center gap-1 border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-30 transition-all">
-            <ChevronLeft className="w-3.5 h-3.5" /> \u0410\u043b\u0434\u044b\u04a3\u0493\u044b
+            <ChevronLeft className="w-3.5 h-3.5" /> Алдыңғы
           </button>
           <button onClick={() => speak(cfg.steps[step].content)}
             className="px-3 py-2 rounded-xl border border-border text-muted-foreground hover:bg-accent/50 transition-all">
@@ -302,7 +312,7 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
             disabled={step === cfg.steps.length - 1}
             className="flex-1 py-2 rounded-xl text-xs flex items-center justify-center gap-1 border text-white disabled:opacity-30 transition-all"
             style={{ background: cfg.color, borderColor: cfg.color }}>
-            \u041a\u0435\u043b\u0435\u0441\u0456 <ChevronRight className="w-3.5 h-3.5" />
+            Келесі <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -311,7 +321,7 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
         <button onClick={() => setShowFormula(!showFormula)}
           className="w-full p-4 flex items-center justify-between text-foreground hover:bg-accent/30 transition-colors">
           <span className="font-semibold text-sm flex items-center gap-2">
-            <Calculator className="w-4 h-4" style={{ color: cfg.color }} /> \u0424\u043e\u0440\u043c\u0443\u043b\u0430\u043b\u0430\u0440
+            <Calculator className="w-4 h-4" style={{ color: cfg.color }} /> Формулалар
           </span>
           <ChevronRight className={'w-4 h-4 text-muted-foreground transition-transform ' + (showFormula ? 'rotate-90' : '')} />
         </button>
@@ -334,7 +344,7 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
         <button onClick={() => { setShowExercise(!showExercise); setShowAnswer(false); }}
           className="w-full p-4 flex items-center justify-between text-foreground hover:bg-accent/30 transition-colors">
           <span className="font-semibold text-sm flex items-center gap-2">
-            <RotateCcw className="w-4 h-4" style={{ color: cfg.color }} /> \u0415\u0441\u0435\u043f \u0448\u044b\u0493\u0430\u0440
+            <RotateCcw className="w-4 h-4" style={{ color: cfg.color }} /> Есеп шығар
           </span>
           <ChevronRight className={'w-4 h-4 text-muted-foreground transition-transform ' + (showExercise ? 'rotate-90' : '')} />
         </button>
@@ -342,22 +352,22 @@ function LessonPanel({ emotionType }: { emotionType: LessonEmotion }) {
           <div className="px-4 pb-4 space-y-3">
             <div className="p-3 rounded-xl border text-sm font-semibold text-foreground"
                  style={{ background: cfg.color + '08', borderColor: cfg.color + '30' }}>
-              \ud83d\udcdd {cfg.exercise.question}
+              📝 {cfg.exercise.question}
             </div>
             {!showAnswer && (
               <div className="p-3 glass-card rounded-xl">
-                <p className="text-xs text-muted-foreground mb-1">\ud83d\udcac \u041a\u0435\u04a3\u0435\u0441:</p>
+                <p className="text-xs text-muted-foreground mb-1">💬 Кеңес:</p>
                 <p className="text-sm text-foreground">{cfg.exercise.hint}</p>
               </div>
             )}
             <button onClick={() => setShowAnswer(!showAnswer)}
               className="w-full py-2.5 rounded-xl text-sm font-medium transition-all"
               style={{ background: showAnswer ? 'var(--accent)' : cfg.color, color: 'white' }}>
-              {showAnswer ? '\u0416\u0430\u0441\u044b\u0440\u0443' : '\u0416\u0430\u0443\u0430\u043f\u0442\u044b \u043a\u04e9\u0440\u0443'}
+              {showAnswer ? 'Жасыру' : 'Жауапты көру'}
             </button>
             {showAnswer && (
               <div className="p-3 bg-success/10 border border-success/20 rounded-xl">
-                <p className="text-xs font-semibold text-success mb-1">\u2705 \u0416\u0430\u0443\u0430\u043f:</p>
+                <p className="text-xs font-semibold text-success mb-1">✅ Жауап:</p>
                 <p className="text-sm font-mono text-foreground">{cfg.exercise.answer}</p>
               </div>
             )}
