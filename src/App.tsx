@@ -7,13 +7,11 @@ import { EmotionProvider } from "@/contexts/EmotionContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import AppNavbar from "@/components/AppNavbar";
 import EmotionCompanion from "@/components/EmotionCompanion";
-import LandingPage from "./pages/LandingPage";
+import EmotionPage from "./pages/EmotionPage";
 import LessonPage from "./pages/LessonPage";
 import SimulationPage from "./pages/SimulationPage";
 import PracticePage from "./pages/PracticePage";
-import EmotionPage from "./pages/EmotionPage";
 import ProgressPage from "./pages/ProgressPage";
-import TeacherDashboard from "./pages/TeacherDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,13 +27,11 @@ const App = () => (
             <AppNavbar />
             <EmotionCompanion />
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<EmotionPage />} />
               <Route path="/lesson" element={<LessonPage />} />
               <Route path="/simulation" element={<SimulationPage />} />
               <Route path="/practice" element={<PracticePage />} />
-              <Route path="/emotion" element={<EmotionPage />} />
               <Route path="/progress" element={<ProgressPage />} />
-              <Route path="/teacher" element={<TeacherDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
