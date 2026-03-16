@@ -4,7 +4,7 @@ import { useEmotion } from '@/contexts/EmotionContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, CheckCircle, BookOpen, Sparkles, FlaskConical, Lightbulb, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface LessonBlock {
   id: string;
@@ -79,66 +79,6 @@ const lessonBlocks: LessonBlock[] = [
         <p>Толық ішкі шағылу (<em>total internal reflection</em>) жағдайы: n₁ &gt; n₂ болғанда, α критикалық бұрыштан асса, жарық мүлдем сынбай, толық шағылады. Бұл оптикалық талшықтардың жұмыс принципі.</p>
         <div className="bg-accent/50 p-5 rounded-2xl border border-accent">
           <p className="text-accent-foreground font-display text-lg">sin(α_крит) = n₂/n₁</p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: 'why-refraction',
-    title: 'Неге жарық бағытын өзгертеді?',
-    simplified: (
-      <div className="space-y-4">
-        <p>Жарық ауада тез жүреді. Суда баяу жүреді. Бағытын неге өзгертеді?</p>
-        <p>Бір мысал: сен достарыңмен қол ұстасып жүріп келесіңдер. Бір жағыңдағы досың құмға тұрса, баяулайды. Сендер бірге бұрыласыңдар!</p>
-        <p>Жарық толқындары да дәл солай — бір жағы баяулағанда, толқын бұрылады.</p>
-      </div>
-    ),
-    normal: (
-      <div className="space-y-4">
-        <p>Жарықтың жылдамдығы ортаның оптикалық тығыздығына байланысты. <strong>Оптикалық тығыздық</strong> — ортаның сыну көрсеткішімен (n) өлшенеді.</p>
-        <ul className="list-disc pl-6 space-y-1">
-          <li>Ауа: n ≈ 1.00</li>
-          <li>Су: n ≈ 1.33</li>
-          <li>Шыны: n ≈ 1.50</li>
-          <li>Алмаз: n ≈ 2.42</li>
-        </ul>
-        <p>n неғұрлым үлкен болса, жарық соғұрлым баяу жүреді, соғұрлым көп сынады.</p>
-      </div>
-    ),
-    advanced: (
-      <div className="space-y-4">
-        <p>Ферма принципі: жарық екі нүкте арасында ең аз уақытты жұмсайтын жолмен жүреді. Бұл принцип Снелл заңын математикалық тұрғыда шығарып алуға мүмкіндік береді.</p>
-        <p>Сыну көрсеткіші — ортаның диэлектрлік өткізгіштігі мен магниттік өткізгіштігіне байланысты: n = √(εμ). Көрінетін жарық диапазонында μ ≈ 1, сондықтан n ≈ √ε.</p>
-      </div>
-    ),
-  },
-  {
-    id: 'angles',
-    title: 'Түсу бұрышы мен сыну бұрышы',
-    simplified: (
-      <div className="space-y-4">
-        <p>Екі маңызды бұрыш бар:</p>
-        <div className="bg-accent/50 p-5 rounded-2xl space-y-2 border border-accent">
-          <p className="text-accent-foreground"><strong>Түсу бұрышы (α)</strong> — жарық қай бұрышпен түседі</p>
-          <p className="text-accent-foreground"><strong>Сыну бұрышы (β)</strong> — жарық қай бұрышпен сынады</p>
-        </div>
-        <p>Бұрыштар <strong>нормаль</strong> деген сызықтан өлшенеді. Нормаль — беткейге перпендикуляр сызық.</p>
-      </div>
-    ),
-    normal: (
-      <div className="space-y-4">
-        <p>Бұрыштар нормаль сызығына қатысты өлшенеді (беткейге перпендикуляр).</p>
-        <p><strong>Түсу бұрышы (α)</strong> — түскен сәуле мен нормаль арасындағы бұрыш.</p>
-        <p><strong>Сыну бұрышы (β)</strong> — сынған сәуле мен нормаль арасындағы бұрыш.</p>
-        <p>Ереже: тығыз ортаға кіргенде β &lt; α, сирек ортаға шыққанда β &gt; α.</p>
-      </div>
-    ),
-    advanced: (
-      <div className="space-y-4">
-        <p>Снелл заңы бұрыштарды нормальдан өлшейді: n₁ sinα = n₂ sinβ.</p>
-        <p>Мысал есептеу: ауадан (n₁=1) суға (n₂=1.33) α=45° бұрышпен түскенде:</p>
-        <div className="bg-accent/50 p-5 rounded-2xl font-display border border-accent">
-          sinβ = (n₁/n₂)·sinα = (1/1.33)·sin45° = 0.532 → β ≈ 32.1°
         </div>
       </div>
     ),
@@ -233,9 +173,9 @@ const lessonBlocks: LessonBlock[] = [
   },
 ];
 
-// Emotion-specific adaptive content
-function EmotionAdaptivePanel({ level, emotion }: { level: string; emotion: string }) {
-  if (emotion === 'confused' || emotion === 'sad') {
+// Emotion-specific supportive messages
+function EmotionSupportPanel({ emotion }: { emotion: string }) {
+  if (emotion === 'confused' || emotion === 'sad' || emotion === 'tired') {
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className="glass-card-pink p-5 mt-6">
@@ -244,72 +184,21 @@ function EmotionAdaptivePanel({ level, emotion }: { level: string; emotion: stri
             <Lightbulb className="w-5 h-5 text-secondary" />
           </div>
           <div>
-            <p className="font-display font-semibold text-foreground mb-1">Қиналып жатырсың ба? 💙</p>
-            <p className="text-sm text-muted-foreground mb-3">
-              Ештеңе етпейді! Материалды қарапайым тілмен түсіндіріп жатырмыз. Демонстрацияны қарасаң, визуалды түсіну оңайырақ болады.
+            <p className="font-display font-semibold text-foreground mb-1">
+              {emotion === 'confused' && 'Қиналып жатырсың ба? 💙'}
+              {emotion === 'tired' && 'Сәл демалайық! 😌'}
+              {emotion === 'sad' && 'Бірге түсінеміз! 💙'}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm" asChild className="border-secondary/30 hover:bg-secondary/10">
-                <Link to="/simulation">
-                  <FlaskConical className="w-4 h-4 mr-1" /> Демонстрация көру
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="border-secondary/30 hover:bg-secondary/10">
-                <RefreshCw className="w-4 h-4 mr-1" /> Қайта оқу
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (emotion === 'tired') {
-    return (
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-5 mt-6 border-warning/20">
-        <div className="flex items-start gap-3">
-          <span className="text-3xl">😌</span>
-          <div>
-            <p className="font-display font-semibold text-foreground mb-1">Сәл демалайық!</p>
             <p className="text-sm text-muted-foreground mb-3">
-              Аз-аздап ілгері жылжу — ол да жеңіс! Қысқа демонстрация қарап, сосын жалғастырайық.
+              {emotion === 'confused' && 'Ештеңе етпейді! Қарапайым тілмен түсіндіріп жатырмыз. Демонстрацияны қарасаң, визуалды түсіну оңайырақ болады.'}
+              {emotion === 'tired' && 'Аз-аздап ілгері жылжу — ол да жеңіс! Қысқа демонстрация қарап, сосын жалғастырайық.'}
+              {emotion === 'sad' && 'Қателесу — үйренудің бір бөлігі. Мысалдарға қарап, визуалды түсін.'}
             </p>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="border-secondary/30 hover:bg-secondary/10">
               <Link to="/simulation">
-                <FlaskConical className="w-4 h-4 mr-1" /> Қызықты демо көру
+                <FlaskConical className="w-4 h-4 mr-1" /> Демонстрация көру
               </Link>
             </Button>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (emotion === 'bored') {
-    return (
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="glass-card-blue p-5 mt-6">
-        <div className="flex items-start gap-3">
-          <span className="text-3xl">⚡</span>
-          <div>
-            <p className="font-display font-semibold text-foreground mb-1">Қызықты факт!</p>
-            <p className="text-sm text-muted-foreground mb-3">
-              Білесің бе? Алмаздың жарқырауы — жарық сынуы мен толық ішкі шағылудың нәтижесі! 
-              Speed challenge ойнап көрсең ше?
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm" asChild className="border-primary/30 hover:bg-primary/10">
-                <Link to="/practice">
-                  <Sparkles className="w-4 h-4 mr-1" /> Speed Challenge
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="border-primary/30 hover:bg-primary/10">
-                <Link to="/simulation">
-                  <FlaskConical className="w-4 h-4 mr-1" /> Алмазбен тәжірибе
-                </Link>
-              </Button>
-            </div>
           </div>
         </div>
       </motion.div>
@@ -324,14 +213,9 @@ function EmotionAdaptivePanel({ level, emotion }: { level: string; emotion: stri
           <span className="text-3xl">🚀</span>
           <div>
             <p className="font-display font-semibold text-foreground mb-1">Тамаша! Жақсы меңгеріп жатырсың!</p>
-            <p className="text-sm text-muted-foreground mb-3">
-              Күрделірек тапсырмаға дайынсың. Есептер шығаруға көш немесе тереңдетілген материалды оқы!
+            <p className="text-sm text-muted-foreground">
+              Сабақтан кейін күрделірек тест күтіп тұр. Алға!
             </p>
-            <Button variant="outline" size="sm" asChild className="border-success/30 hover:bg-success/10">
-              <Link to="/practice">
-                <Sparkles className="w-4 h-4 mr-1" /> Есептерге көшу
-              </Link>
-            </Button>
           </div>
         </div>
       </motion.div>
@@ -345,14 +229,21 @@ export default function LessonPage() {
   const [currentBlock, setCurrentBlock] = useState(0);
   const { getAdaptiveLevel, emotion } = useEmotion();
   const { completeLesson } = useProgress();
+  const navigate = useNavigate();
   const level = getAdaptiveLevel();
   const block = lessonBlocks[currentBlock];
+  const isLastBlock = currentBlock === lessonBlocks.length - 1;
 
   const content = level === 'simplified' ? block.simplified : level === 'advanced' ? block.advanced : block.normal;
 
   const goNext = () => {
     completeLesson(block.id);
-    if (currentBlock < lessonBlocks.length - 1) setCurrentBlock(currentBlock + 1);
+    if (!isLastBlock) setCurrentBlock(currentBlock + 1);
+  };
+
+  const finishLesson = () => {
+    completeLesson(block.id);
+    navigate('/simulation');
   };
 
   const levelLabels = { simplified: 'Қарапайым', normal: 'Стандарт', advanced: 'Тереңдетілген' };
@@ -364,9 +255,7 @@ export default function LessonPage() {
         <div className="flex items-center gap-2 mb-8">
           {lessonBlocks.map((_, i) => (
             <div key={i} className="h-2 flex-1 rounded-full transition-all duration-500 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-700 ${
-                i < currentBlock ? 'w-full' : i === currentBlock ? 'w-full' : 'w-full'
-              }`} style={{
+              <div className="h-full rounded-full transition-all duration-700 w-full" style={{
                 background: i < currentBlock
                   ? 'linear-gradient(135deg, hsl(155 70% 42%), hsl(155 70% 52%))'
                   : i === currentBlock
@@ -404,8 +293,8 @@ export default function LessonPage() {
           </div>
         </motion.div>
 
-        {/* Emotion-adaptive panel */}
-        <EmotionAdaptivePanel level={level} emotion={emotion.current} />
+        {/* Emotion support panel */}
+        <EmotionSupportPanel emotion={emotion.current} />
 
         <div className="flex items-center justify-between mt-10">
           <Button
@@ -418,10 +307,11 @@ export default function LessonPage() {
             Алдыңғы
           </Button>
 
-          {currentBlock === lessonBlocks.length - 1 ? (
-            <Button variant="hero" onClick={() => completeLesson(block.id)} className="rounded-xl glow-primary">
-              <CheckCircle className="w-4 h-4 mr-1" />
-              Аяқтау
+          {isLastBlock ? (
+            <Button variant="hero" onClick={finishLesson} className="rounded-xl glow-primary">
+              <FlaskConical className="w-4 h-4 mr-1" />
+              Демонстрацияға өту
+              <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button variant="hero" onClick={goNext} className="rounded-xl glow-primary">

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEmotion } from '@/contexts/EmotionContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Lightbulb, ChevronRight, Trophy, FlaskConical, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Problem {
   id: string;
@@ -118,15 +118,29 @@ const problems: Problem[] = [
 ];
 
 export default function PracticePage() {
+  const { getAdaptiveLevel, emotion, getMotivationalMessage } = useEmotion();
+  const { completeProblem, progress } = useProgress();
+  const navigate = useNavigate();
+  
+  // Auto-select difficulty based on emotion
+  const adaptiveLevel = getAdaptiveLevel();
+  const defaultFilter = adaptiveLevel === 'simplified' ? 'easy' as const 
+    : adaptiveLevel === 'advanced' ? 'hard' as const 
+    : 'medium' as const;
+
+  const [filterLevel, setFilterLevel] = useState<'all' | 'easy' | 'medium' | 'hard'>(defaultFilter);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
-  const [filterLevel, setFilterLevel] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
-  const { getAdaptiveLevel, emotion, getMotivationalMessage } = useEmotion();
-  const { completeProblem, progress } = useProgress();
+  const [testFinished, setTestFinished] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [totalAnswered, setTotalAnswered] = useState(0);
 
-  const filteredProblems = filterLevel === 'all' ? problems : problems.filter(p => p.level === filterLevel);
+  const filteredProblems = useMemo(() => 
+    filterLevel === 'all' ? problems : problems.filter(p => p.level === filterLevel),
+    [filterLevel]
+  );
   const problem = filteredProblems[currentIdx] || filteredProblems[0];
   const isCorrect = selected !== null && selected === problem.correctIndex;
 
@@ -134,19 +148,24 @@ export default function PracticePage() {
     if (selected !== null) return;
     setSelected(idx);
     completeProblem(problem.id, idx === problem.correctIndex);
+    setTotalAnswered(prev => prev + 1);
+    if (idx === problem.correctIndex) setCorrectCount(prev => prev + 1);
   };
 
   const nextProblem = () => {
+    if (currentIdx >= filteredProblems.length - 1) {
+      setTestFinished(true);
+      return;
+    }
     setSelected(null);
     setShowHint(false);
     setShowSteps(false);
-    setCurrentIdx(prev => (prev + 1) % filteredProblems.length);
+    setCurrentIdx(prev => prev + 1);
   };
 
   const levelLabel = { easy: 'Жеңіл', medium: 'Орташа', hard: 'Күрделі' };
   const levelColor = { easy: 'bg-success/10 text-success', medium: 'bg-warning/10 text-warning', hard: 'bg-destructive/10 text-destructive' };
 
-  // Emotion-based encouragement after wrong answer
   const getEncouragement = () => {
     if (emotion.current === 'confused' || emotion.current === 'sad') {
       return 'Ештеңе етпейді! Демонстрацияны қарап, визуалды түсінуге тырыс.';
@@ -157,6 +176,37 @@ export default function PracticePage() {
     return getMotivationalMessage();
   };
 
+  if (testFinished) {
+    const percent = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="glass-card p-10 text-center shadow-elevated">
+            <Trophy className="w-16 h-16 text-warning mx-auto mb-4" />
+            <h2 className="text-3xl font-display font-bold text-foreground mb-2">Тест аяқталды!</h2>
+            <p className="text-lg text-muted-foreground mb-4">
+              Нәтиже: <span className="font-bold text-foreground">{correctCount}/{totalAnswered}</span> ({percent}%)
+            </p>
+            <div className="mb-6">
+              {percent >= 80 && <p className="text-success font-semibold text-lg">🌟 Тамаша нәтиже!</p>}
+              {percent >= 50 && percent < 80 && <p className="text-warning font-semibold text-lg">👍 Жақсы! Тағы біраз жаттығу керек.</p>}
+              {percent < 50 && <p className="text-secondary font-semibold text-lg">💪 Сабақты қайта оқып, тағы тырыс!</p>}
+            </div>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Button variant="outline" onClick={() => navigate('/progress')} className="rounded-xl">
+                Прогресті көру
+              </Button>
+              <Button variant="hero" onClick={() => navigate('/')} className="rounded-xl glow-primary">
+                Басына оралу
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -166,9 +216,9 @@ export default function PracticePage() {
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Есептер шығару</h1>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Адаптивті тест</h1>
             <p className="text-sm text-muted-foreground">
-              Деңгей: {getAdaptiveLevel() === 'simplified' ? 'Жеңілдетілген' : getAdaptiveLevel() === 'advanced' ? 'Күрделілеу' : 'Стандарт'}
+              Эмоцияңа сай деңгей: {adaptiveLevel === 'simplified' ? 'Жеңіл' : adaptiveLevel === 'advanced' ? 'Күрделі' : 'Орташа'}
             </p>
           </div>
         </div>
@@ -176,7 +226,7 @@ export default function PracticePage() {
         {/* Level filter */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {(['all', 'easy', 'medium', 'hard'] as const).map(l => (
-            <button key={l} onClick={() => { setFilterLevel(l); setCurrentIdx(0); setSelected(null); }}
+            <button key={l} onClick={() => { setFilterLevel(l); setCurrentIdx(0); setSelected(null); setShowHint(false); setShowSteps(false); }}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                 filterLevel === l 
                   ? 'text-primary-foreground shadow-lg' 
@@ -266,7 +316,7 @@ export default function PracticePage() {
                   <p className="text-sm text-muted-foreground italic mb-2">{getEncouragement()}</p>
                 )}
                 <Button variant="hero" size="sm" className="mt-2 rounded-xl glow-primary" onClick={nextProblem}>
-                  Келесі есеп <ChevronRight className="w-4 h-4 ml-1" />
+                  {currentIdx >= filteredProblems.length - 1 ? 'Нәтижені көру' : 'Келесі есеп'} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </motion.div>
             )}

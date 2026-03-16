@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, FlaskConical, Calculator, Brain, TrendingUp, LayoutDashboard, Home, Sparkles } from 'lucide-react';
+import { BookOpen, FlaskConical, Calculator, Brain, TrendingUp, Home, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEmotion } from '@/contexts/EmotionContext';
 
-// Anime avatars
 import girlConfident from '@/assets/emotions/girl-confident.png';
 import girlCurious from '@/assets/emotions/girl-curious.png';
 import girlConfused from '@/assets/emotions/girl-confused.png';
@@ -29,13 +28,11 @@ const avatarMap: Record<GenderType, Record<EmotionType, string>> = {
 };
 
 const navItems = [
-  { path: '/', label: 'Басты бет', icon: Home },
+  { path: '/', label: 'Эмоция', icon: Brain },
   { path: '/lesson', label: 'Сабақ', icon: BookOpen },
   { path: '/simulation', label: 'Демо', icon: FlaskConical },
-  { path: '/practice', label: 'Есептер', icon: Calculator },
-  { path: '/emotion', label: 'Эмоция', icon: Brain },
+  { path: '/practice', label: 'Тест', icon: Calculator },
   { path: '/progress', label: 'Прогресс', icon: TrendingUp },
-  { path: '/teacher', label: 'Мұғалім', icon: LayoutDashboard },
 ];
 
 const emotionLabels: Record<string, string> = {

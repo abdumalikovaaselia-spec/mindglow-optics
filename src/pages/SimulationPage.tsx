@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useProgress } from '@/contexts/ProgressContext';
 import { useEmotion } from '@/contexts/EmotionContext';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const media = [
   { label: 'Ауа', n: 1.0, color: '#EFF6FF' },
@@ -17,6 +19,7 @@ export default function SimulationPage() {
   const [medium2Idx, setMedium2Idx] = useState(1);
   const { viewSimulation } = useProgress();
   const { emotion } = useEmotion();
+  const navigate = useNavigate();
   const hasViewed = useRef(false);
 
   useEffect(() => {
@@ -179,7 +182,7 @@ export default function SimulationPage() {
           key={`${angle}-${medium1Idx}-${medium2Idx}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="glass-card p-6 shadow-elevated"
+          className="glass-card p-6 mb-6 shadow-elevated"
         >
           <h3 className="font-display font-semibold text-foreground text-lg mb-4">Нәтижелер</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -211,6 +214,13 @@ export default function SimulationPage() {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Go to test */}
+        <div className="flex justify-center">
+          <Button variant="hero" size="lg" onClick={() => navigate('/practice')} className="rounded-xl glow-primary">
+            Тестке өту <ArrowRight className="w-5 h-5 ml-1" />
+          </Button>
+        </div>
       </div>
     </div>
   );
