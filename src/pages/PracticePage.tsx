@@ -330,10 +330,25 @@ export default function PracticePage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
 
-  const filteredProblems = useMemo(() => 
-    filterLevel === 'all' ? problems : problems.filter(p => p.level === filterLevel),
-    [filterLevel]
-  );
+  // Shuffle options for each problem, preserving correct answer tracking
+  const shuffledProblems = useMemo(() => {
+    const base = filterLevel === 'all' ? problems : problems.filter(p => p.level === filterLevel);
+    return base.map(p => {
+      const indices = p.options.map((_, i) => i);
+      // Fisher-Yates shuffle
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      return {
+        ...p,
+        options: indices.map(i => p.options[i]),
+        correctIndex: indices.indexOf(p.correctIndex),
+      };
+    });
+  }, [filterLevel]);
+
+  const filteredProblems = shuffledProblems;
   const problem = filteredProblems[currentIdx] || filteredProblems[0];
   const isCorrect = selected !== null && selected === problem.correctIndex;
 
