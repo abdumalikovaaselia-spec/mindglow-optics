@@ -27,6 +27,7 @@ const App = () => (
           <BrowserRouter>
             <AppNavbar />
             <EmotionCompanion />
+            <AIChatAssistant />
             <Routes>
               <Route path="/" element={<EmotionPage />} />
               <Route path="/lesson" element={<LessonPage />} />
