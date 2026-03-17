@@ -7,6 +7,7 @@ import { EmotionProvider } from "@/contexts/EmotionContext";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import AppNavbar from "@/components/AppNavbar";
 import EmotionCompanion from "@/components/EmotionCompanion";
+import AIChatAssistant from "@/components/AIChatAssistant";
 import EmotionPage from "./pages/EmotionPage";
 import LessonPage from "./pages/LessonPage";
 import SimulationPage from "./pages/SimulationPage";
