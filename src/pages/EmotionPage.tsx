@@ -108,12 +108,31 @@ export default function EmotionPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
 
+        {/* Topic header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 glass-card-pink px-4 py-2 !rounded-full mb-4">
+            <Sparkles className="w-4 h-4 text-secondary" />
+            <span className="text-sm font-semibold text-foreground">Theory of Mind AI платформасы</span>
+            <Sparkles className="w-4 h-4 text-primary" />
+          </div>
+          <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-2">
+            Жарықтың <span className="text-gradient">сынуы</span>
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground font-medium mb-1">
+            Эмоцияға бейімделген оқу тәжірибесі
+          </p>
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+            Оптика әлемін зерттеп, жарық сынуының құпиясын аш. AI көмекші сенің эмоцияңды ескеріп, ең тиімді оқу жолын ұсынады.
+          </p>
+        </motion.div>
+
+        {/* Emotion detection header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'var(--gradient-primary)' }}>
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Эмоцияны анықтау</h1>
+            <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">Эмоцияны анықтау</h2>
             <p className="text-sm text-muted-foreground">Алдымен эмоцияңды анықтайық, сосын сабақ сенің күйіңе бейімделеді</p>
           </div>
         </div>
